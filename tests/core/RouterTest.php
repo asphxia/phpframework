@@ -14,8 +14,8 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
      * @var Router
      */
     protected $object;
-    private $controller = 'Hello';
-    private $action     = 'world';
+    private $controller = 'Index';
+    private $action     = 'index';
     private $params     = array('name','Dario');
 
     /**
@@ -24,7 +24,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
      */
     protected function setUp() {
         $url = "/" . $this->controller . "/" . $this->action . "/" . join("/",$this->params);
-        $this->assertEquals($url, '/Hello/world/name/Dario');
+        $this->assertEquals($url, '/Index/index/name/Dario');
         $this->object = new Router($url);
     }
 
