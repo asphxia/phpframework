@@ -1,0 +1,28 @@
+* Configuration:
+    * Add support for inheritage 
+        * inclusion 
+        * section inheritage
+    * Write drivers for PHP-,Ini-,json-based configuration (encoders)
+
+- Render:
+    - It should work taking the following into account:
+        - Themes / Layouts - no
+        - Cache - no
+        - Forms? - no
+        - includable items / partials - no
+    - Should be compatible / expandable to work with Smarty. -- chainabillity / injectabillity
+
+- Front controller:
+    - Response format: json, html, console/text.
+
+- Dynamic scaffolding:
+    - yaml/json/php schema definition and a custom interpreter/model builder AT RUN TIME!.
+
+- Router:
+    - 
+
+* Build a bare minimal configuration and app.
+    - What about default configurations? / do not force any project structure.
+
+* No need for namespaces / PHP 5.3 / fancy stuff.
+* PHPDocs

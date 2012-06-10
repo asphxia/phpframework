@@ -1,0 +1,5 @@
+project.base=.
+export.dir=/var/www/virtual/
+author=Asphyxia
+legal.notice=Copyleft 2012 ${author}
+license=

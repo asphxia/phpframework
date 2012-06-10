@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="php web framework" default="export" description="" basedir=".">
+    <property file="configuration" />
+    <tstamp>
+        <format property="buildtime" pattern="%a, %d %b %Y, %H:%M"/>
+    </tstamp>
+
+    <target name="code_sniff">
+        <phpcodesniffer
+            standard="Zend"
+            showSniffs="true"
+            showWarnings="true">
+            <fileset dir="${project.base}/ajaxchat">
+                <include name="db/models/*.php"/>
+                <include name="application/**/*.php"/>
+                <include name="core/*.php"/>
+                <include name="web/*.php"/>
+            </fileset>
+        </phpcodesniffer>
+
+    </target>
+    <target name="export">
+        <copy todir="${export.dir}/ajaxchat">
+            <filterchain>
+                <expandproperties />
+            </filterchain>
+            <fileset dir="${project.base}">
+                <include name="vendor/**/*.php" />
+                <include name="core/*.php" />
+                
+                <include name="application/views/**/*.phtml" />
+                <include name="application/controllers/*.php" />
+                <include name="application/models/*.php" />
+                
+                <include name="application/assets/images/*.jpg" />
+                <include name="application/assets/images/*.png" />
+                <include name="application/assets/js/*.js" />
+                <include name="application/assets/css/*.css" />
+                <include name="config/configuration.yml" />
+                
+                <include name="web/index.php" />
+                <include name="web/.htaccess" />
+                
+                <exclude name="configuration" />
+                <exclude name="build.xml" />
+                <exclude name="docs/**" />
+                <exclude name="**/*~" />
+                <exclude name="**/*.sql" />
+                <exclude name="**/*.psd" />
+                <exclude name="**/*.xml" />
+                <exclude name="**/*.bak" />
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean_up">
+        <delete>
+            <fileset dir="${project.base}">
+                <include name="index.php~" />
+            </fileset>
+        </delete>
+    </target>
+
+</project>
