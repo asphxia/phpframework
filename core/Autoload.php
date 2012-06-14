@@ -14,6 +14,7 @@ final class Autoload {
 
         # TODO Get classes to load from configuration
         $classes = array(
+            'Core\Exception' => '../core/CoreException',
             'Core\Render\Render' => '../core/render/Render',
             'Core\Router\Utils\Utils' => '../core/router/utils/Utils',
             'Core\Router\Router' => '../core/router/Router',
