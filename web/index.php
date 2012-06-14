@@ -12,22 +12,22 @@
 namespace Core;
 // Require components
 //require dirname(__FILE__) . '/../core/Core.php';
-require dirname(__FILE__) . '/../core/Config.php';
-require dirname(__FILE__) . '/../core/Router.php';
+require dirname(__FILE__) . '/../core/CoreException.php';
+require dirname(__FILE__) . '/../core/utils/Singleton.php';
+require dirname(__FILE__) . '/../core/config/EncoderInterface.php';
+require dirname(__FILE__) . '/../core/config/encoder/IniEncoder.php';
+require dirname(__FILE__) . '/../core/config/Configuration.php';
+require dirname(__FILE__) . '/../core/router/utils/Utils.php';
+require dirname(__FILE__) . '/../core/router/Router.php';
 require dirname(__FILE__) . '/../core/FrontController.php';
 
 // Initialize the FrontControllers
 // Call the given controller and action
-FrontController::getInstance(array(
-                                'config' => array(
-                                        'file' =>  '../config/' . $_SERVER['SERVER_NAME'] . '.yml',
-                                        'encoder' => null,
-    )))->routeController();
-        
+$Fc = FrontController::getInstance();
+$Fc->routeController();
+
 // Now through the singleton FC we have our body developed behind the scenes
 // and ready to GO... may be.
-FrontController::getInstance()->getRender()->output(
-     FrontController::getInstance()->getResponse()
-);
+$Fc->getRender()->output($Fc->getResponse());
 
 // je veux dormir, dormir plutot que vivre

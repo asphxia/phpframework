@@ -1,58 +1,93 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="php web framework" default="export" description="" basedir=".">
+<project name="php web framework" default="deploy" description="" basedir=".">
     <property file="configuration" />
     <tstamp>
         <format property="buildtime" pattern="%a, %d %b %Y, %H:%M"/>
     </tstamp>
 
-    <target name="code_sniff">
-        <phpcodesniffer
-            standard="Zend"
-            showSniffs="true"
-            showWarnings="true">
-            <fileset dir="${project.base}/ajaxchat">
-                <include name="db/models/*.php"/>
-                <include name="application/**/*.php"/>
-                <include name="core/*.php"/>
-                <include name="web/*.php"/>
-            </fileset>
+    <!-- app src code -->
+    <fileset id="core-src" dir="${project.base}">
+        <include name="core/**" />
+    </fileset>
+    
+    <!-- public files -->
+    <fileset id="web-src" dir="${project.base}">
+        <include name="web/index.php" />
+        <include name="web/.htaccess" />
+    </fileset>
+    
+    <!-- app core files: bare application -->
+    <!-- core-src + web-src + configuration -->
+    <fileset id="skeleton-src" dir="${project.base}">
+        <!-- default essential configuration -->
+        <include name="config/*.ini" />
+        
+        <!-- bare bootstrap app -->
+        <include name="web/.htaccess" />
+        <include name="web/index.php" />
+        
+        <!-- app core files -->
+        <include name="core/**" />
+    </fileset>
+    
+    <!-- app files -->
+    <fileset id="app-src" dir="${project.base}">
+        <include name="application/views/**/*.phtml" />
+        <include name="application/controllers/*.php" />
+        <include name="application/models/*.php" />
+    </fileset>
+    
+    <fileset id="vendor" dir="${project.base}">
+        <include name="vendor/**" />
+    </fileset>
+    
+    <fileset id="exclude-list" dir="${project.base}">
+        <exclude name="**" />
+        <exclude name="configuration" />
+        <exclude name="build.xml" />
+        <exclude name="docs/**" />
+        <exclude name="**/*~" />
+        <exclude name="**/*.sql" />
+        <exclude name="**/*.psd" />
+        <exclude name="**/*.xml" />
+        <exclude name="**/*.bak" />
+    </fileset>
+                
+    <!-- task: code-sniff -->
+    <target name="code-sniff">
+        <phpcodesniffer standard="Zend" showSniffs="true" showWarnings="true">
+            <fileset refid="core-src" />
         </phpcodesniffer>
-
     </target>
-    <target name="export">
-        <copy todir="${export.dir}/ajaxchat">
+
+    <!-- task: deploy -->
+    <target name="deploy">
+        <copy todir="${export.dir}">
+            <!-- expand all properties -->
             <filterchain>
                 <expandproperties />
             </filterchain>
-            <fileset dir="${project.base}">
-                <include name="vendor/**/*.php" />
-                <include name="core/*.php" />
-                
-                <include name="application/views/**/*.phtml" />
-                <include name="application/controllers/*.php" />
-                <include name="application/models/*.php" />
-                
-                <include name="application/assets/images/*.jpg" />
-                <include name="application/assets/images/*.png" />
-                <include name="application/assets/js/*.js" />
-                <include name="application/assets/css/*.css" />
-                <include name="config/configuration.yml" />
-                
-                <include name="web/index.php" />
-                <include name="web/.htaccess" />
-                
-                <exclude name="configuration" />
-                <exclude name="build.xml" />
-                <exclude name="docs/**" />
-                <exclude name="**/*~" />
-                <exclude name="**/*.sql" />
-                <exclude name="**/*.psd" />
-                <exclude name="**/*.xml" />
-                <exclude name="**/*.bak" />
-            </fileset>
+            
+            <!-- copy all files -->
+            <fileset refid="vendor" />
+            <fileset refid="app-src" />
+            <fileset refid="skeleton-src" />
+            <fileset refid="web-src" />
+            <!-- ignore sensitive files -->
+            <fileset refid="exclude-list" />
         </copy>
     </target>
-    <target name="clean_up">
+    
+    <!-- task: dist -->
+    <target name="dist">
+        <mkdir dir="${project.build}" />
+        <tar destfile="${project.build}/${project.distfilename}" compression="gzip">
+            <fileset refid="skeleton-src" />
+        </tar>
+    </target>
+    
+    <!-- remove old files -->
+    <target name="clean-up">
         <delete>
             <fileset dir="${project.base}">
                 <include name="index.php~" />

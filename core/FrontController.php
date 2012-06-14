@@ -7,8 +7,10 @@
  * @copyright copyleft 2012
  */
 //require 'FrontControllerHelpers.php';
+
 namespace Core;
-final class FrontController {
+
+final class FrontController extends \Core\Utils\Singleton {
 
     /**
      * $_controller and $_action will hold our controller class (it's name)
@@ -19,33 +21,44 @@ final class FrontController {
      * @protected string $_action the controller's method to call
      * @protected array $_params bidimentional non-assoc array of [keys, values]
      * @protected string $_body output
-     * @static object $instance out singleton class instance
      */
-    protected static $_instance = null;
+    protected static $_instance;
     private $router = null;
     private $response = null;
-    private $config   = null;
-
-    private function __construct($request, $config) {
-        $this->router = new Router($request);
-        $this->config = Config\Configuration::getInstance($config['file'], $config['encoder']);
+    private $config = null;
+    public function setRouter(Router $router = null) {
+        $this->router = is_null($router) ? $this->getRouter() : $router;
     }
-    /**
-     * Simple singleton method.
-     *
-     * @return object the class instance
-     */
-    public function getInstance(Array $configuration = null, $request = null) {
-        if (empty(self::$_instance)) {
-            //$_SERVER['REQUEST_URI']
-            $config = array('file' => null, 'encoder' => null);
-            if (is_array($configuration)) {
-                $request = (isset($configuration['request'])) ? $configuration['request'] : $request;
-                $config = (isset($configuration['config'])) ? $configuration['config'] : $config;
-            }
-            self::$_instance = new FrontController($request, $config);
+
+    public function getRouter() {
+        if (is_null($this->router)) {
+            $config = $this->getConfiguration();
+            $defaults = $config->getConfiguration('defaults');
+            $system = $config->getConfiguration('system');
+            
+            $this->router = new Router\Router(array(
+                'namespace' => $defaults['namespace'],
+                'controller'=> $defaults['controller'],
+                'action'    => $defaults['action'],
+            ));
+            $this->router->processPath($_SERVER['REQUEST_URI']);
+            $this->router->setIncludePath(dirname(__FILE__) . '/' . $system['includePath']);
+
         }
-        return self::$_instance;
+        return $this->router;
+    }
+
+    public function setConfiguration(Configuration $configuration = null) {
+        $this->config = is_null($configuration) ? $this->getConfiguration() : $configuration;
+    }
+
+    public function getConfiguration() {
+        if (is_null($this->config)) {
+            $this->config = Configuration\Configuration::getInstance();
+            $this->config->setDataSource(dirname(__FILE__) . '/../config/default.ini');
+            $this->config->setEncoder(new Configuration\IniEncoder());
+        }
+        return $this->config;
     }
 
     /**
@@ -54,27 +67,32 @@ final class FrontController {
      * @return void
      */
     public function routeController() {
-        return $this->setResponse($this->router->routeController());
-        
+        return $this->setResponse($this->getRouter()->routeController());
     }
-    
+
     public function getRender() {
-        if (null !== $render = $this->config->getConfig(array('system', 'render'))) {
+        $router = $this->getRouter();
+        $config = $this->getConfiguration();
+
+        if (null !== $render = $config->getConfiguration(array('system' => 'render'))) {
             if (!class_exists($render['name'])) {
-                require dirname(__FILE__) . $render['path'];
+                require dirname(__FILE__) . '/' . $render['path'];
             }
-            $render = new $render['name']($this->config->getConfig('render'));
-            $render->setActivePage($this->router->getAction(), $this->router->getController());
+            $render = new $render['name']($config->getConfiguration('render'));
+            $render->setActivePage($router->getAction(), $router->getController());
             return $render;
+            
         } else {
-            throw new \Exception('Render not found');
+            throw new Exception('Render not found: `' . $render . '`');
         }
     }
 
     public function getResponse() {
         return $this->response;
     }
+
     private function setResponse($response) {
         return $this->response = $response;
     }
+
 }

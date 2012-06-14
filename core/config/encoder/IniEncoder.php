@@ -14,7 +14,7 @@
  *
  * @author asphyxia
  */
-namespace Core\Config;
+namespace Core\Configuration;
 
 class IniEncoder implements EncoderInterface {
     private static $VERSION = '0.1';
@@ -37,7 +37,7 @@ class IniEncoder implements EncoderInterface {
     private function processInheritance($data){
         foreach ($data as $key => $val) {
             if (strstr($key, self::$INHERITAGE_SEPARATOR)) {
-                $section = split(self::$INHERITAGE_SEPARATOR, $key);
+                $section = @split(self::$INHERITAGE_SEPARATOR, $key);
 
                 if (array_key_exists($section[1], $data)){
                     $data[$section[0]] = $data[$section[1]];
@@ -95,6 +95,10 @@ class IniEncoder implements EncoderInterface {
             $this->_datasrc = null;
         }
         return $this->_datasrc;
+    }
+
+    public function encode($data, $format) {
+        
     }
 
 }

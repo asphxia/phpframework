@@ -8,7 +8,7 @@
  * @version #Id#
  * @built #buildtime#
  */
-namespace Core\Config;
+namespace Core\Configuration;
 /**
  *
  * @author asphyxia

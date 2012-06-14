@@ -1,26 +1,13 @@
 <?php
 
-namespace Core\Config;
+namespace Core\Configuration;
+use Exception;
 
-final class Configuration {
-
-    private static $instance;
-
+final class Configuration extends \Core\Utils\Singleton {
+    protected static $_instance;
     private $_data = null;
     private $_encoder = null;
     private $_config = null;
-
-    /**
-     * Instantiate a Configuration class (singleton).
-     * 
-     * @return Configuration Returns a Configuration class instance.
-     */
-    public static function getInstance() {
-        if (empty (self::$instance)) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
 
     /**
      * Shortcut method to setup the configuration file and encoder.
@@ -29,9 +16,9 @@ final class Configuration {
      * @param Object $encoder A encoder object (which implements ConfigEncoder interface).
      */
     public function setConfiguration($config, EncoderInterface $encoder = null) {
-        self::$instance->setDataSource($config);
+        $this->setDataSource($config);
         if ($encoder instanceof EncoderInterface) {
-            self::$instance->setEncoder($encoder);
+            $this->setEncoder($encoder);
         }
     }
     /**
@@ -66,7 +53,7 @@ final class Configuration {
      */
     public function getConfiguration($arrPath, $data = null) {
         if ($data == null && null === $data = $this->getData()) {
-            return false;
+            throw new Exception('No configuration loaded.');
         }
         if ($arrPath === null) {
             return $data;
@@ -98,13 +85,8 @@ final class Configuration {
      * @param Object $encoder An encoder object (that implements the ConfigEncoder interface)
      * @return Object Returns the encoder given.
      */
-    public function setEncoder($encoder) {
-        if (is_object($encoder)) {
-            $this->_encoder = $encoder;
-        }else{
-            $this->_encoder = null;
-        }
-        return $this->_encoder;
+    public function setEncoder(EncoderInterface $encoder) {
+        $this->_encoder = $encoder;
     }
     
     /**
@@ -129,9 +111,8 @@ final class Configuration {
         if (is_string($configuration) && file_exists($configuration)) {
             $this->_config = $configuration;
         }else{
-            $this->_config = null;
+            throw new Exception('Invalid DataSource provided or DataSource not found.');
         }
-        return $this->_config;
     }
     /**
      * Returns the current configuration file.
@@ -144,17 +125,12 @@ final class Configuration {
 
     private function getData() {
         if ($this->_encoder === null) {
-            return false;
+            throw new Exception('No encoder defined.');
         }
         if ($this->_data === null) {
             $this->_encoder->setDataSource($this->_config);
-            
             $this->_data = $this->_encoder->processConfig();
         }
         return $this->_data;
     }
-    
-    private function __construct() {}
-    public function __destruct() {}
-    private function __clone() {}
 }

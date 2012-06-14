@@ -1,3 +1,9 @@
+- Core
+    - Autoload
+    - Exceptions
+    - Default pages
+    - Console/scaffolding
+
 * Configuration:
     * Add support for inheritage 
         * inclusion 
@@ -22,7 +28,7 @@
     - 
 
 * Build a bare minimal configuration and app.
-    - What about default configurations? / do not force any project structure.
+    * What about default configurations? / do not force any project structure.
 
 * No need for namespaces / PHP 5.3 / fancy stuff.
 * PHPDocs

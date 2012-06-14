@@ -21,10 +21,6 @@ final class Render {
     # for the actions in the controller.
     private $page        = null;
     private $namespace   = null;
-    
-    public static $DEFAULT_PAGE_DIR = '../application/views';
-    public static $DEFAULT_PAGE = 'Index';
-    public static $DEFAUL_EXTENSION = '.phtml';
 
     public function __construct(array $configuration = array()) {
         if (isset($configuration['pages'])) {
@@ -54,6 +50,12 @@ final class Render {
             if (isset($config['pages'])) {
                 $config['pages'] = $this->setPages( dirname(__FILE__) . '/' . $config['pages']);
             }
+            if (isset($config['defaultNamespace'])) {
+                $config['defaultNamespace'] = $this->setNamespace( $config['defaultNamespace']);
+            }
+            if (isset($config['defaultPage'])) {
+                $config['defaultPage'] = $this->setActivePage($config['defaultPage']);
+            }
             $this->config = $config;
         }else{
             $this->config = array();
@@ -71,7 +73,7 @@ final class Render {
         return $this->pages;
     }
     public function getPages() {
-        return ($this->pages)?$this->pages : self::$DEFAULT_PAGE_DIR;
+        return $this->pages;
     }
     
     public function setNamespace($namespace) {
@@ -91,25 +93,21 @@ final class Render {
         }
         if (false !== $this->validPath($this->getPageFullPath($page) )) {
             $this->page = $page;
-        }else{
-            $this->page =  self::$DEFAULT_PAGE;
         }
         return $this->page;
     }
     public function getActivePage() {
-        return ($this->page)?$this->page : self::$DEFAULT_PAGE;
+        return $this->page;
     }
     
     public function setExtension($ext) {
         if (preg_match('/^\.[a-z]{1,5}$/', $ext)) {
             $this->extension = $ext;
-        }else{
-            $this->extension = self::$DEFAUL_EXTENSION;
         }
         return $this->extension;
     }
     public function getExtension() {
-        return ($this->extension)?$this->extension : self::$DEFAUL_EXTENSION;
+        return $this->extension;
     }
     
     private function validPath($path) {
@@ -124,7 +122,7 @@ final class Render {
     # TODO: Optional response format (json for httpxmlrequest, html for normal http requests)
     
     private function getPageFullPath($page) {
-        return $this->getPages() . $this->getNamespace() . '/' .  \ucfirst($page) . '/' . $this->getExtension();
+        return $this->getPages() . $this->getNamespace() . '/' .  \ucfirst($page) . $this->getExtension();
     }
 
     private function requirePage() {
@@ -132,7 +130,7 @@ final class Render {
         if (file_exists( $ap )) {
             return $ap;
         }else{
-            throw new \Exception('View not found! ' . $ap);
+            throw new \Core\Exception('View not found: `' . $ap . '`');
         }
     }
     
