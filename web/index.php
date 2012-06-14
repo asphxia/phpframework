@@ -11,15 +11,7 @@
  */
 namespace Core;
 // Require components
-//require dirname(__FILE__) . '/../core/Core.php';
-require dirname(__FILE__) . '/../core/CoreException.php';
-require dirname(__FILE__) . '/../core/utils/Singleton.php';
-require dirname(__FILE__) . '/../core/config/EncoderInterface.php';
-require dirname(__FILE__) . '/../core/config/encoder/IniEncoder.php';
-require dirname(__FILE__) . '/../core/config/Configuration.php';
-require dirname(__FILE__) . '/../core/router/utils/Utils.php';
-require dirname(__FILE__) . '/../core/router/Router.php';
-require dirname(__FILE__) . '/../core/FrontController.php';
+require dirname(__FILE__) . '/../core/Core.php';
 
 // Initialize the FrontControllers
 // Call the given controller and action
