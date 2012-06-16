@@ -176,6 +176,14 @@ class IniEncoder implements EncoderInterface {
         }
         return $this->_datasrc;
     }
+    
+    /**
+     *
+     * @return type 
+     */
+    public function getDataSource() {
+        return $this->_datasrc;
+    }
 
     /**
      *

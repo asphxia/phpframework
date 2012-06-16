@@ -6,10 +6,11 @@
  * @author asphyxia
  * @copyright copyleft 2012
  */
-//require 'FrontControllerHelpers.php';
-
 namespace Core;
 
+/**
+ * 
+ */
 final class FrontController extends \Core\Utils\Singleton {
 
     /**

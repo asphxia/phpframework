@@ -1,27 +1,60 @@
 <?php
 
+/*
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ * 
+ * @copyright #legal.notice#
+ * @version #Id#
+ * @built #buildtime#
+ */
+namespace Core\Render;
 /**
- * Description of RenderHelpers
+ * Description of Render
  *
  * @author asphyxia
  */
-
-namespace Core\Render;
-
 final class Render {
+    /**
+     *
+     * @var type 
+     */
     private $config = null;
+    
+    /**
+     *
+     * @var type 
+     */
     private $availablePages = null;
 
+    /**
+     *
+     * @var type 
+     */
     private $pages = null;
+    
+    /**
+     *
+     * @var type 
+     */
     private $extension = null;
     
-    # TODO Add a controller path for pages: views/controller/view.phtml
-    # currently it looks for pages/templates/views/whatever into views/*.phtml
-    # with the page name as the controller. We need to have different templates
-    # for the actions in the controller.
-    private $page        = null;
-    private $namespace   = null;
-
+    /**
+     *
+     * @var type 
+     */
+    private $page = null;
+    
+    /**
+     *
+     * @var type 
+     */
+    private $namespace = null;
+    
+    /**
+     *
+     * @param array $configuration 
+     */
     public function __construct(array $configuration = array()) {
         if (isset($configuration['pages'])) {
             $this->setAvailablePages($configuration['pages']);
@@ -30,6 +63,12 @@ final class Render {
             $this->setConfig($configuration['config']);
         }
     }
+    
+    /**
+     *
+     * @param array $pages
+     * @return type 
+     */
     public function setAvailablePages(Array $pages) {
         if (is_array($pages)) {
             $this->availablePages = $pages;
@@ -38,10 +77,20 @@ final class Render {
         }
         return $this->availablePages;
     }
+    
+    /**
+     *
+     * @return type 
+     */
     public function getAvailablePages() {
         return ($this->availablePages) ? $this->availablePages : array();
     }
     
+    /**
+     *
+     * @param array $config
+     * @return type 
+     */
     public function setConfig(Array $config) {
         if (is_array($config)) {
             if (isset($config['extension'])) {
@@ -62,20 +111,40 @@ final class Render {
         }
         return $this->config;
     }
+    
+    /**
+     *
+     * @return type 
+     */
     public function getConfig() {
         return ($this->config) ? $this->config : array();
     }
     
+    /**
+     *
+     * @param type $dir
+     * @return type 
+     */
     public function setPages($dir) {
         if (false !== $this->validPath($dir)) {
             $this->pages = $dir;
         }
         return $this->pages;
     }
+    
+    /**
+     *
+     * @return type 
+     */
     public function getPages() {
         return $this->pages;
     }
     
+    /**
+     *
+     * @param type $namespace
+     * @return type 
+     */
     public function setNamespace($namespace) {
         $namespace = \ucfirst($namespace);
         if (false !== $this->validPath($this->getPages() . '/' .  $namespace)) {
@@ -83,10 +152,21 @@ final class Render {
         }
         return $namespace;
     }
+    
+    /**
+     *
+     * @return type 
+     */
     public function getNamespace() {
         return $this->namespace;
     }
     
+    /**
+     *
+     * @param type $page
+     * @param type $namespace
+     * @return type 
+     */
     public function setActivePage($page, $namespace = null) {
         if (!is_null($namespace)) {
             $this->setNamespace($namespace);
@@ -96,20 +176,40 @@ final class Render {
         }
         return $this->page;
     }
+    
+    /**
+     *
+     * @return type 
+     */
     public function getActivePage() {
         return $this->page;
     }
     
+    /**
+     *
+     * @param type $ext
+     * @return type 
+     */
     public function setExtension($ext) {
         if (preg_match('/^\.[a-z]{1,5}$/', $ext)) {
             $this->extension = $ext;
         }
         return $this->extension;
     }
+    
+    /**
+     *
+     * @return type 
+     */
     public function getExtension() {
         return $this->extension;
     }
     
+    /**
+     *
+     * @param type $path
+     * @return boolean 
+     */
     private function validPath($path) {
         $fullpath = $path; // dirname(__FILE__)
         if (file_exists($fullpath)) {
@@ -118,13 +218,21 @@ final class Render {
             return false;
         }
     }
-    # TODO: Add buffering (so echos won't show up immediatly, also, good to work with firephp)
-    # TODO: Optional response format (json for httpxmlrequest, html for normal http requests)
     
+    /**
+     *
+     * @param type $page
+     * @return type 
+     */
     private function getPageFullPath($page) {
         return $this->getPages() . $this->getNamespace() . '/' .  \ucfirst($page) . $this->getExtension();
     }
 
+    /**
+     *
+     * @return type
+     * @throws \Core\Exception 
+     */
     private function requirePage() {
         $ap = $this->getPageFullPath($this->getActivePage());
         if (file_exists( $ap )) {
@@ -134,6 +242,10 @@ final class Render {
         }
     }
     
+    /**
+     *
+     * @param type $data 
+     */
     public function output($data = null) {
         if (is_array($data)) {
             foreach ($data as $key => $val) {

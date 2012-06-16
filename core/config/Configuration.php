@@ -1,12 +1,42 @@
 <?php
 
+/*
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ * 
+ * @copyright #legal.notice#
+ * @version #Id#
+ * @built #buildtime#
+ */
 namespace Core\Configuration;
 use Exception;
-
+/**
+ * 
+ * @author asphyxia 
+ */
 final class Configuration extends \Core\Utils\Singleton {
+    /**
+     *
+     * @var type 
+     */
     protected static $_instance;
+    
+    /**
+     *
+     * @var type 
+     */
     private $_data = null;
+    
+    /**
+     *
+     * @var type 
+     */
     private $_encoder = null;
+    
+    /**
+     *
+     * @var type 
+     */
     private $_config = null;
 
     /**
@@ -52,26 +82,38 @@ final class Configuration extends \Core\Utils\Singleton {
      * @return type
      */
     public function getConfiguration($arrPath, $data = null) {
+        
+        // If there is no data (src) configured
         if ($data == null && null === $data = $this->getData()) {
             throw new Exception('No configuration loaded.');
         }
+        
+        // If there is no arrPath (key=>values paths) we return the entire configuration
         if ($arrPath === null) {
             return $data;
+        // If arrPath is a string we convert it to string to work with it
         }elseif (!is_array($arrPath)) {
              $arrPath = array($arrPath);
         }
 
+        // We turn an index-based array to a key-value array
         $keyCount = array_keys($arrPath);
         if ($keyCount[0] === 0) {
             $arrPath = array($arrPath[0] => '');
         }
 
+        // For each key-value we check it existence in the `data` array
         foreach ($arrPath as $key => $val) {
             if (array_key_exists($key, $data)) {
+                // If the item contains an array we make a recursive call
                 if (is_array($val)) {
                     return $this->getConfiguration($val, $data[$key]);
+                    
+                // Otherwise, if it's not empty, we return its value
                 }elseif ($val !== '') {
                     return $data[$key][$val];
+
+                // Or just the key itself
                 }else{
                     return $data[$key];
                 }
@@ -123,6 +165,11 @@ final class Configuration extends \Core\Utils\Singleton {
         return $this->_config;
     }
 
+    /**
+     *
+     * @return type
+     * @throws Exception 
+     */
     private function getData() {
         if ($this->_encoder === null) {
             throw new Exception('No encoder defined.');

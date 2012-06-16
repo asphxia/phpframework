@@ -14,7 +14,23 @@ namespace Core\Configuration;
  * @author asphyxia
  */
 interface EncoderInterface {
+    
+    /**
+     * 
+     */
     public function processConfig();
+    
+    /**
+     * 
+     */
     public function setDataSource($datasource);
+    
+    /**
+     * 
+     */
+    public function getDataSource();
+    /**
+     * 
+     */
     public function getVersion();
 }
