@@ -1,5 +1,13 @@
+- Port Devl to the framework
+- Port twitter bootstrap to the framework
+- Refactor Render
+- Add a console to handle 
+    - the creation of controllers/actions/models.
+    - the configuration
+    - the deployment?
+
 - Core
-    - Autoload
+    * Autoload
     - Exceptions
     - Default pages
     - Console/scaffolding
@@ -30,5 +38,5 @@
 * Build a bare minimal configuration and app.
     * What about default configurations? / do not force any project structure.
 
-* No need for namespaces / PHP 5.3 / fancy stuff.
+* No need for namespaces / PHP 5.3 / fancy stuff. -- no
 * PHPDocs

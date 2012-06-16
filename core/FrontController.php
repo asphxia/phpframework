@@ -13,29 +13,53 @@ namespace Core;
 final class FrontController extends \Core\Utils\Singleton {
 
     /**
-     * $_controller and $_action will hold our controller class (it's name)
-     * and our given controller's action (a method). So, this is like saying
-     * Call the method Print of the class HTML, but in the form: HTML/Print
-     * 
-     * @protected string $_controller the controller name (class name)
-     * @protected string $_action the controller's method to call
-     * @protected array $_params bidimentional non-assoc array of [keys, values]
-     * @protected string $_body output
+     *
+     * @var type 
      */
     protected static $_instance;
+    
+    /**
+     *
+     * @var type 
+     */
     private $router = null;
+    
+    /**
+     *
+     * @var type 
+     */
     private $response = null;
+    
+    /**
+     *
+     * @var type 
+     */
     private $config = null;
+    
+    /**
+     *
+     * @var type 
+     */
+    public static $CONFIGURATION_FILES = array('config/user', 'config/app', 'config/default',
+                                                'user', 'app', 'default');
+    /**
+     *
+     * @param Router $router 
+     */
     public function setRouter(Router $router = null) {
         $this->router = is_null($router) ? $this->getRouter() : $router;
     }
 
+    /**
+     *
+     * @return type 
+     */
     public function getRouter() {
         if (is_null($this->router)) {
             $config = $this->getConfiguration();
             $defaults = $config->getConfiguration('defaults');
             $system = $config->getConfiguration('system');
-            
+
             $this->router = new Router\Router(array(
                 'namespace' => $defaults['namespace'],
                 'controller'=> $defaults['controller'],
@@ -47,15 +71,30 @@ final class FrontController extends \Core\Utils\Singleton {
         }
         return $this->router;
     }
-
+    
+    /**
+     *
+     * @param Configuration $configuration 
+     */
     public function setConfiguration(Configuration $configuration = null) {
         $this->config = is_null($configuration) ? $this->getConfiguration() : $configuration;
     }
 
+    /**
+     *
+     * @return type 
+     */
     public function getConfiguration() {
         if (is_null($this->config)) {
             $this->config = Configuration\Configuration::getInstance();
-            $this->config->setDataSource(dirname(__FILE__) . '/../config/default.ini');
+            
+            foreach (self::$CONFIGURATION_FILES as $config) {
+                $config = dirname(__FILE__) . '/../' . $config . '.ini';
+                if (file_exists($config)) {
+                    $this->config->setDataSource($config);
+                    break;
+                }
+            }
             $this->config->setEncoder(new Configuration\IniEncoder());
         }
         return $this->config;
@@ -69,7 +108,12 @@ final class FrontController extends \Core\Utils\Singleton {
     public function routeController() {
         return $this->setResponse($this->getRouter()->routeController());
     }
-
+    
+    /**
+     *
+     * @return \Core\render
+     * @throws Exception 
+     */
     public function getRender() {
         $router = $this->getRouter();
         $config = $this->getConfiguration();
@@ -87,10 +131,19 @@ final class FrontController extends \Core\Utils\Singleton {
         }
     }
 
+    /**
+     *
+     * @return type 
+     */
     public function getResponse() {
         return $this->response;
     }
 
+    /**
+     *
+     * @param type $response
+     * @return type 
+     */
     private function setResponse($response) {
         return $this->response = $response;
     }

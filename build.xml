@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="php web framework" default="deploy" description="" basedir=".">
+<project name="php web framework" default="help" description="" basedir=".">
     <property file="configuration" />
     <tstamp>
         <format property="buildtime" pattern="%a, %d %b %Y, %H:%M"/>
     </tstamp>
+    <target name="help">
+        <echo msg="Tasks: " />
+        <echo msg="   code-sniff: makes a code-sniff on core-src" />
+        <echo msg="   deploy: copies core-src, web-src, skeleton-src, etc to `${export.dir}`" />
+        <echo msg="   dist: builds `${project.distfilename}` of core-src" />
+    </target>
 
     <!-- app src code -->
     <fileset id="core-src" dir="${project.base}">
