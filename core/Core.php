@@ -6,12 +6,13 @@
  */
 namespace Core;
 require_once dirname(__FILE__) . '/../core/Autoload.php';
+require_once dirname(__FILE__) . '/../core/Exception.php';
 final class Core {
     public function __construct() {
         error_reporting(E_ALL);
         mb_internal_encoding('UTF-8');
         spl_autoload_register(array(new Autoload(), 'loadClass'));
-        #set_exception_handler(array(new CoreException(), 'handleException'));
+        set_exception_handler(array(new Exception(), 'handleException'));
         session_start();
     }
 }
