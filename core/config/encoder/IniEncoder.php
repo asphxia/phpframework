@@ -15,6 +15,7 @@
  * @author asphyxia
  */
 namespace Core\Configuration;
+use Core\Exception;
 
 class IniEncoder implements EncoderInterface {
     /**
@@ -47,6 +48,12 @@ class IniEncoder implements EncoderInterface {
      */
     private $_datasrc = null;
 
+    
+    /**
+     * 
+     */
+    private $_includePath = null;
+    
     /**
      *
      * @return type 
@@ -60,7 +67,7 @@ class IniEncoder implements EncoderInterface {
      * @param type $data
      * @return type 
      */
-    private function processInheritance($data){
+    private function processInheritance(Array $data){
         foreach ($data as $key => $val) {
             if (strstr($key, self::$INHERITAGE_SEPARATOR)) {
                 $section = @split(self::$INHERITAGE_SEPARATOR, $key);
@@ -82,7 +89,7 @@ class IniEncoder implements EncoderInterface {
      * @param type $data
      * @return null 
      */
-    private function getIncludeSection($data) {
+    private function getIncludeSection(Array $data) {
         // walk through every configuration section.
         foreach ($data as $section => $val) {
             // if there is any `include` section we process it.
@@ -143,7 +150,7 @@ class IniEncoder implements EncoderInterface {
         if (null !== $includes = $this->getIncludeSection($data) ) {
             // for each item in the `include` section (relative paths)
             foreach ($includes as $file) {
-                $inclusion = $this->processConfig(dirname($this->_datasrc) . '/' . $file);
+                $inclusion = $this->processConfig($this->_includePath . $file);
                 $data = $this->mergeArray($data, $inclusion);
             }    
         }
@@ -155,11 +162,15 @@ class IniEncoder implements EncoderInterface {
      * @param type $data
      * @return type 
      */
-    public function processConfig($data = null) {
-        if ($data == null) $data = $this->_datasrc;
-        $data = parse_ini_file($data, true);
-        $data = $this->processInclusion($data);
-        $data = $this->processInheritance($data);
+    public function processConfig($datasrc = null) {
+        if ($datasrc == null) $datasrc = $this->_datasrc;
+        $data = @parse_ini_file($datasrc, true);
+        if (is_array($data)) {
+            $data = $this->processInclusion($data);
+            $data = $this->processInheritance($data);
+        }else{
+            throw new Exception('Couldn\'t open configuration file: `' . $datasrc . '`');
+        }
         return $data;
     }
 
@@ -184,7 +195,28 @@ class IniEncoder implements EncoderInterface {
     public function getDataSource() {
         return $this->_datasrc;
     }
-
+    
+    /**
+    *
+    * @param type $includePath
+    * @return type 
+    */
+    public function setIncludePath($includePath) {
+        if (is_string($includePath) && file_exists($includePath)) {
+            $this->_includePath = $includePath;
+        }else{
+            $this->_includePath = null;
+        }
+        return $this->_includePath;
+    }
+    
+    /**
+     *
+     * @return type 
+     */
+    public function getIncludePath() {
+        return $this->_includePath;
+    }
     /**
      *
      * @param type $data

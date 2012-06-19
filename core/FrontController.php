@@ -41,8 +41,14 @@ final class FrontController extends \Core\Utils\Singleton {
      *
      * @var type 
      */
-    public static $CONFIGURATION_FILES = array('config/user', 'config/app', 'config/default',
-                                                'user', 'app', 'default');
+    public static $CONFIGURATION_FILES = array('user', 'app', 'default');
+    
+    /**
+     *
+     * @var type 
+     */
+    public static $INCLUDE_PATHS = array('', 'config/');
+    
     /**
      *
      * @param Router $router 
@@ -89,7 +95,13 @@ final class FrontController extends \Core\Utils\Singleton {
         if (is_null($this->config)) {
             $this->config = Configuration\Configuration::getInstance();
             
-            foreach (self::$CONFIGURATION_FILES as $config) {
+            $configurationFiles = array();
+            foreach (self::$INCLUDE_PATHS as $path) {
+                foreach (self::$CONFIGURATION_FILES as $fileName) {   
+                    $configurationFiles[] = $path . $fileName;
+                }
+            }
+            foreach ($configurationFiles as $config) {   
                 $config = dirname(__FILE__) . '/../' . $config . '.ini';
                 if (file_exists($config)) {
                     $this->config->setDataSource($config);

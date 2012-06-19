@@ -38,6 +38,11 @@ final class Configuration extends \Core\Utils\Singleton {
      * @var type 
      */
     private $_config = null;
+    
+    /**
+     * 
+     */
+    private $_includePath = null;
 
     /**
      * Shortcut method to setup the configuration file and encoder.
@@ -46,6 +51,7 @@ final class Configuration extends \Core\Utils\Singleton {
      * @param Object $encoder A encoder object (which implements ConfigEncoder interface).
      */
     public function setConfiguration($config, EncoderInterface $encoder = null) {
+        $this->setIncludePath(dirname(__FILE__) . '/../../');
         $this->setDataSource($config);
         if ($encoder instanceof EncoderInterface) {
             $this->setEncoder($encoder);
@@ -164,7 +170,23 @@ final class Configuration extends \Core\Utils\Singleton {
     public function getDataSource() {
         return $this->_config;
     }
-
+    
+    /**
+     *
+     * @param type $includePath 
+     */
+    public function setIncludePath($includePath) {
+        $this->_includePath = $includePath;
+    }
+    
+    /**
+     *
+     * @return type 
+     */
+    public function getIncludePath() {
+        return $this->_includePath;
+    }
+    
     /**
      *
      * @return type
@@ -176,6 +198,8 @@ final class Configuration extends \Core\Utils\Singleton {
         }
         if ($this->_data === null) {
             $this->_encoder->setDataSource($this->_config);
+            $this->_includePath = $this->_includePath ? $this->_includePath : dirname(__FILE__) . '/../../';
+            $this->_encoder->setIncludePath($this->_includePath);
             $this->_data = $this->_encoder->processConfig();
         }
         return $this->_data;
