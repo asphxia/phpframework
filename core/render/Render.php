@@ -9,12 +9,14 @@
  * @built #buildtime#
  */
 namespace Core\Render;
+use Core\Utils\Logger as Logger;
+use Core\Exception as Exception;
 /**
  * Description of Render
  *
  * @author asphyxia
  */
-final class Render {
+class Render {
     /**
      *
      * @var type 
@@ -49,7 +51,24 @@ final class Render {
      *
      * @var type 
      */
+    private $master = null;
+    
+    /**
+     *
+     * @var type 
+     */
+    private $root = null;
+    
+    /**
+     *
+     * @var type 
+     */
     private $namespace = null;
+    
+    /**
+     * 
+     */
+    private $layoutsPath = null;
     
     /**
      *
@@ -60,8 +79,36 @@ final class Render {
             $this->setAvailablePages($configuration['pages']);
         }
         if (isset($configuration['config'])) {
-            $this->setConfig($configuration['config']);
+            $this->setConfiguration($configuration['config']);
         }
+    }
+    
+    /**
+     *
+     * @param array $config
+     * @return type 
+     */
+    public function setConfiguration(Array $config) {
+        if (!is_array($config)) {
+            $config = array($config);
+        }
+        foreach ($config as $key => $val) {
+            $method = 'set' . ucfirst($key);
+            if (method_exists($this, $method)) {
+                $config[$key] = $this->$method($val);
+            }else{
+                throw new Exception('Method doesnt exists: `'. $method .'`');
+            }
+        }
+        return $this->config;
+    }
+    
+    /**
+     *
+     * @return type 
+     */
+    public function getConfiguration() {
+        return ($this->config) ? $this->config : array();
     }
     
     /**
@@ -88,46 +135,15 @@ final class Render {
     
     /**
      *
-     * @param array $config
-     * @return type 
-     */
-    public function setConfig(Array $config) {
-        if (is_array($config)) {
-            if (isset($config['extension'])) {
-                $config['extension'] = $this->setExtension($config['extension']);
-            }
-            if (isset($config['pages'])) {
-                $config['pages'] = $this->setPages( dirname(__FILE__) . '/' . $config['pages']);
-            }
-            if (isset($config['defaultNamespace'])) {
-                $config['defaultNamespace'] = $this->setNamespace( $config['defaultNamespace']);
-            }
-            if (isset($config['defaultPage'])) {
-                $config['defaultPage'] = $this->setActivePage($config['defaultPage']);
-            }
-            $this->config = $config;
-        }else{
-            $this->config = array();
-        }
-        return $this->config;
-    }
-    
-    /**
-     *
-     * @return type 
-     */
-    public function getConfig() {
-        return ($this->config) ? $this->config : array();
-    }
-    
-    /**
-     *
      * @param type $dir
      * @return type 
      */
-    public function setPages($dir) {
+    public function setViewsPath($dir) {
+        $dir = realpath($this->getRootPath() . '/' . $dir);
         if (false !== $this->validPath($dir)) {
             $this->pages = $dir;
+        }else{
+            throw new Exception('Invalid pages path: `' . $dir .'`');
         }
         return $this->pages;
     }
@@ -136,8 +152,53 @@ final class Render {
      *
      * @return type 
      */
-    public function getPages() {
+    public function getViewsPath() {
         return $this->pages;
+    }
+    
+    /**
+     *
+     * @param type $master 
+     */
+    public function setMasterPage($master) {
+        $master = realpath($this->getRootPath() . '/' . $master);
+        if (false !== $this->validPath($master)) {
+            $this->master = $master;
+        }else{
+            throw new Exception('Invalid master view: `' . $master . '`');
+        }
+        return $this->master;
+    }
+    
+    /**
+     * 
+     */
+    public function getMasterPage() {
+      return $this->master;  
+    }
+    
+    /**
+     *
+     * @param type $root
+     * @return type
+     * @throws Exception 
+     */
+    public function setRootPath($root) {
+        $root = realpath(__DIR__ . '/' . $root);
+        if (false !== $this->validPath($root)) {
+            $this->root = $root;
+        }else{
+            throw new Exception('Invalid root path: `' . $root. '`');
+        }
+        return $this->root;
+    }
+    
+    /**
+     *
+     * @return type 
+     */
+    public function getRootPath() {
+        return $this->root;
     }
     
     /**
@@ -147,8 +208,11 @@ final class Render {
      */
     public function setNamespace($namespace) {
         $namespace = \ucfirst($namespace);
-        if (false !== $this->validPath($this->getPages() . '/' .  $namespace)) {
+        $fullpath = realpath($this->getRootPath() . '/' .  $namespace);
+        if (false !== $this->validPath($fullpath)) {
             $this->namespace = $namespace;
+        }else{
+            throw new Exception('Invalid namespace path: `' . $fullpath .'`');
         }
         return $namespace;
     }
@@ -162,6 +226,24 @@ final class Render {
     }
     
     /**
+     * 
+     */
+    public function getLayoutsPath() {
+        return $this->layoutsPath;
+    }
+    
+    /**
+     * 
+     */
+    public function setLayoutsPath($path) {
+        $path = realpath($this->getRootPath() . '/' . $path);
+        if (false !== $this->validPath($path)) {
+            $this->layoutsPath = $path;
+        }else{
+            throw new Exception('Invalid layout path: `' . $path .'`');
+        }
+    }
+    /**
      *
      * @param type $page
      * @param type $namespace
@@ -171,8 +253,11 @@ final class Render {
         if (!is_null($namespace)) {
             $this->setNamespace($namespace);
         }
-        if (false !== $this->validPath($this->getPageFullPath($page) )) {
+        $fullpath = $this->getPageFullPath($page);
+        if (false !== $this->validPath($fullpath)) {
             $this->page = $page;
+        }else{
+            throw new Exception('Invalid page: `'.$fullpath. '`');
         }
         return $this->page;
     }
@@ -190,9 +275,11 @@ final class Render {
      * @param type $ext
      * @return type 
      */
-    public function setExtension($ext) {
+    public function setViewsExtension($ext) {
         if (preg_match('/^\.[a-z]{1,5}$/', $ext)) {
             $this->extension = $ext;
+        }else{
+            throw new Exception('Invalid extension: `'.$ext.'`');
         }
         return $this->extension;
     }
@@ -201,7 +288,7 @@ final class Render {
      *
      * @return type 
      */
-    public function getExtension() {
+    public function getViewsExtension() {
         return $this->extension;
     }
     
@@ -211,11 +298,11 @@ final class Render {
      * @return boolean 
      */
     private function validPath($path) {
-        $fullpath = $path; // dirname(__FILE__)
-        if (file_exists($fullpath)) {
+        $fullpath = realpath($path);
+        if (false !== $fullpath && file_exists($fullpath)) {
             return $fullpath;
         }else{
-            return false;
+            throw new Exception('Invalid path: `' . $fullpath . '`');
         }
     }
     
@@ -225,7 +312,7 @@ final class Render {
      * @return type 
      */
     private function getPageFullPath($page) {
-        return $this->getPages() . $this->getNamespace() . '/' .  \ucfirst($page) . $this->getExtension();
+        return realpath($this->getViewsPath() . '/' .  \strtolower($page) . $this->getViewsExtension());
     }
 
     /**
@@ -235,10 +322,11 @@ final class Render {
      */
     private function requirePage() {
         $ap = $this->getPageFullPath($this->getActivePage());
+        Logger::log("View: $ap");
         if (file_exists( $ap )) {
             return $ap;
         }else{
-            throw new \Core\Exception('View not found: `' . $ap . '`');
+            throw new Exception('View not found: `' . $this->getActivePage() . '`');
         }
     }
     
@@ -252,7 +340,14 @@ final class Render {
                 $$key = $val;
             }
         }
+        ob_clean();
+        ob_start();
         require $this->requirePage();
+        $partial = ob_get_clean();
+        Logger::log("Master: $this->master");
+        if (isset($this->master) && $this->master != '') {
+            require $this->master;
+        }
     }
 
 }
