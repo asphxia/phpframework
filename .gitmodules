@@ -1,0 +1,12 @@
+[submodule "vendor/Autoloader"]
+	path = vendor/Autoloader
+	url = https://github.com/malkusch/php-autoloader.git
+[submodule "vendor/ChromePHP"]
+	path = vendor/ChromePHP
+	url = https://github.com/ccampbell/chromephp.git
+[submodule "vendor/MustachePHP"]
+	path = vendor/MustachePHP
+	url = https://github.com/bobthecow/mustache.php.git
+[submodule "vendor/Stash"]
+	path = vendor/Stash
+	url = https://github.com/tedivm/Stash.git
