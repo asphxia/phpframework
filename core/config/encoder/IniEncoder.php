@@ -15,7 +15,7 @@
  * @author asphyxia
  */
 namespace Core\Configuration;
-use Core\Exception;
+use Core\Exception as Exception;
 
 class IniEncoder implements EncoderInterface {
     /**
@@ -70,7 +70,7 @@ class IniEncoder implements EncoderInterface {
     private function processInheritance(Array $data){
         foreach ($data as $key => $val) {
             if (strstr($key, self::$INHERITAGE_SEPARATOR)) {
-                $section = @split(self::$INHERITAGE_SEPARATOR, $key);
+                $section = explode(self::$INHERITAGE_SEPARATOR, $key);
 
                 if (array_key_exists($section[1], $data)){
                     $data[$section[0]] = $data[$section[1]];
@@ -183,7 +183,7 @@ class IniEncoder implements EncoderInterface {
         if (is_string($datasource) && file_exists($datasource)) {
             $this->_datasrc = $datasource;
         }else{
-            $this->_datasrc = null;
+            throw new Exception('Invalid data source: `'.$datasource.'`');
         }
         return $this->_datasrc;
     }
@@ -205,7 +205,7 @@ class IniEncoder implements EncoderInterface {
         if (is_string($includePath) && file_exists($includePath)) {
             $this->_includePath = $includePath;
         }else{
-            $this->_includePath = null;
+            throw new Exception('Invalid include path: `' . $includePath.'`');
         }
         return $this->_includePath;
     }
@@ -223,7 +223,6 @@ class IniEncoder implements EncoderInterface {
      * @param type $format 
      */
     public function encode($data, $format) {
-        
     }
 
 }

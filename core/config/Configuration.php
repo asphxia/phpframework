@@ -9,12 +9,15 @@
  * @built #buildtime#
  */
 namespace Core\Configuration;
-use Exception;
+use Core\Exception;
+use Core\Utils\Singleton;
+use Core\Configuration\EncoderInterface as EncoderInterface;
+
 /**
  * 
  * @author asphyxia 
  */
-final class Configuration extends \Core\Utils\Singleton {
+final class Configuration extends Singleton {
     /**
      *
      * @var type 
@@ -50,8 +53,9 @@ final class Configuration extends \Core\Utils\Singleton {
      * @param String $config Path (absolute) to the configuration file.
      * @param Object $encoder A encoder object (which implements ConfigEncoder interface).
      */
-    public function setConfiguration($config, EncoderInterface $encoder = null) {
-        $this->setIncludePath(dirname(__FILE__) . '/../../');
+    public function setConfiguration($config, EncoderInterface $encoder = null, $includePath = null) {
+        $includePath = ($includePath) ? $includePath : __DIR__ . '/../../';
+        $this->setIncludePath($includePath);
         $this->setDataSource($config);
         if ($encoder instanceof EncoderInterface) {
             $this->setEncoder($encoder);
@@ -198,7 +202,7 @@ final class Configuration extends \Core\Utils\Singleton {
         }
         if ($this->_data === null) {
             $this->_encoder->setDataSource($this->_config);
-            $this->_includePath = $this->_includePath ? $this->_includePath : dirname(__FILE__) . '/../../';
+            $this->_includePath = $this->_includePath ? $this->_includePath : __DIR__ . '/../../';
             $this->_encoder->setIncludePath($this->_includePath);
             $this->_data = $this->_encoder->processConfig();
         }
