@@ -8,7 +8,7 @@ namespace Core;
 define('__ROOT__', realpath(__DIR__.'/../') . '/');
 chdir(__ROOT__);
 require_once __ROOT__.'vendor/Autoloader/Autoloader.php';
-foreach (array('vendor', 'libs', 'core', 'apps') as $classPath) {
+foreach (array('vendor', 'libs', 'core') as $classPath) {
     $_autoloader = new \Autoloader(__ROOT__ . $classPath);
     $_autoloader->register();
 }

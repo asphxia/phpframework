@@ -20,6 +20,6 @@ $Fc->routeController();
 
 // Now through the singleton FC we have our body developed behind the scenes
 // and ready to GO... may be.
-$Fc->getRender()->output($Fc->getResponse());
+$Fc->getRenderEngine()->output($Fc->getResponse());
 
 // je veux dormir, dormir plutot que vivre

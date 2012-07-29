@@ -22,6 +22,11 @@
         <include name="web/.htaccess" />
     </fileset>
     
+    <!-- app common libraries -->
+    <fileset id="libs" dir="${project.base}">
+        <include name="libs/**" />
+    </fileset>
+    
     <!-- app core files: bare application -->
     <!-- core-src + web-src + configuration -->
     <fileset id="skeleton-src" dir="${project.base}">
@@ -75,6 +80,7 @@
             </filterchain>
             
             <!-- copy all files -->
+            <fileset refid="libs" />
             <fileset refid="vendor" />
             <fileset refid="app-src" />
             <fileset refid="skeleton-src" />

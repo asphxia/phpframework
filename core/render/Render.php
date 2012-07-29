@@ -312,7 +312,9 @@ class Render {
      * @return type 
      */
     private function getPageFullPath($page) {
-        return realpath($this->getViewsPath() . '/' .  \strtolower($page) . $this->getViewsExtension());
+        $fullpath = $this->getViewsPath() . '/' .  \strtolower($page) . $this->getViewsExtension();
+        Logger::log("View fullpath: `" . $fullpath . '`');
+        return realpath($fullpath);
     }
 
     /**

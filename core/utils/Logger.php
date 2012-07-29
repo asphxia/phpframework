@@ -15,11 +15,11 @@
  * @author asphyxia
  */
 namespace Core\Utils;
-require_once __ROOT__.'vendor/ChromePHP/ChromePHP.php';
-class Logger extends \ChromePHP {
+require_once __ROOT__.'vendor/ChromePHP/ChromePhp.php';
+class Logger extends \ChromePhp {
     public function __construct()
     {
         @ob_start();
-        return ChromePHP::getInstance(true);
+        return ChromePhp::getInstance(true);
     }
 }
