@@ -15,7 +15,7 @@
  * @author asphyxia
  */
 namespace Core\Router\Utils;
-use Core\Exception;
+use Core\Exception as Exception;
 
 class Utils {
     /**
@@ -50,12 +50,41 @@ class Utils {
      * @var Array 
      */
     protected $params;
-    
+
+    /**
+     * 
+     */
+    protected $rewrites;
+
     /**
      *
      * @var type 
      */
     protected $includePath;
+
+    /**
+     * Regular expression to determine the validity of a controller name
+     * @var type String
+     */
+    protected static $validControllerName = '/^[a-z_]+$/i';   
+    
+    /**
+     * Regular expression to determine the validity of a namespace name
+     * @var type String
+     */
+    protected static $validNamespaceName = '/^[a-z]+$/i';
+    
+    /**
+     * Regular expression to determine the validity of an action name
+     * @var type String
+     */
+    protected static $validActionName = '/^[a-z]+$/i';
+    
+    /**
+     *
+     * @var type 
+     */
+    protected static $validIncludePath = '/^[a-z\/\.]+$/i';
     
     /**
      * Shortcut method to set up the class.
@@ -70,6 +99,18 @@ class Utils {
             }
         }
     }
+    
+    public function getConfiguration(Array $params = array()) {
+        $result = array();
+        foreach (array_values($params) as $key) {
+            $method = 'get' . ucfirst(strtolower($key));
+            if (method_exists($this, $method)) {
+                $res = $this->$method();
+                $result[$key] = $res;
+            }
+        }
+        return $result;
+    }
 
     /**
      *
@@ -77,7 +118,11 @@ class Utils {
      * @return type 
      */
     public function setNamespace($namespace) {
-        return $this->namespace = $namespace;
+        if (\preg_match(self::$validNamespaceName, $namespace)) {
+            return $this->namespace = ucfirst(strtolower($namespace));
+        }else{
+            throw new Exception('Invalid namespace name');
+        }
     }
     
     /**
@@ -103,13 +148,13 @@ class Utils {
      * @param String $controller
      * @return String 
      * @throws Exception 
-     */
+     */ 
     public function setController($controller) {
-        //if (\preg_match('@^[\w\\\/]$@', $controller)) {
-            return $this->controller = $controller;
-        //}else{
-        //    throw new Exception('Invalid controller name');
-        //}
+        if (\preg_match(self::$validControllerName, $controller)) {
+            return $this->controller = ucfirst(strtolower($controller));
+        }else{
+            throw new Exception('Invalid controller name');
+        }
     }
     
     /**
@@ -129,11 +174,11 @@ class Utils {
      * @throws Exception 
      */
     public function setAction($action) {
-        //if (preg_match('/^[a-zA-Z]$/', $action)) {
-            return $this->action = $action;
-        //}else{
-        //    throw new Exception('Invalid action name.');
-        //}
+        if (\preg_match(self::$validActionName, $action)) {
+            return $this->action = lcfirst($action);
+        }else{
+            throw new Exception('Invalid action name.');
+        }
     }
    
     /**
@@ -153,14 +198,10 @@ class Utils {
      * @throws Exception 
      */
     public function setIncludePath($path) {
-        if (preg_match('/[a-zA-Z\/\.]/', $path)) {
-            if (file_exists($path)) {
-                return $this->includePath = $path;
-            }else{
-                throw new Exception('Provided class path could not be found: `' . $path .'`.');
-            }
+        if (\preg_match(self::$validIncludePath, $path)) {
+            return $this->includePath = $path;
         }else{
-            throw new Exception('Include path contains invalid characters.');
+            throw new Exception('Include path contains invalid characters:'.$path);
         }
     }
     
@@ -202,6 +243,20 @@ class Utils {
     }
     
     /**
+     *
+     * @param array $rewrites
+     * @return type 
+     */
+    public function setRewrites(Array $rewrites = array()) { 
+        $url = $this->getRequest() ? $this->getRequest() : $_SERVER['REQUEST_URI'];
+        $requestUri = str_replace('.php', '', (false != $str = strstr($url, '?', -1)) ? $str : $url );
+        foreach ($rewrites as $match => $change) {
+            $requestUri = str_replace($match, $change, $requestUri);
+        }
+        return $requestUri = $this->setRequest($requestUri);
+    }
+    
+    /**
      * Tries to load (require construct) the given controller.
      * 
      * @throws Exception 
@@ -214,39 +269,53 @@ class Utils {
             throw new Exception('No controller defined.');
         }
         $controller = $this->getIncludePath() . '/' . $this->getController() . '.php';
-        if (file_exists($controller)) {
-            require_once $controller;
-        }else{
-            throw new Exception('Controller not found: `' . $controller . '`');
-        }
+        require_once $controller;
     }
-    
+
+    protected function getRequestPath($path, $request){
+        $logicalPath = false;
+        if (isset($_REQUEST[$path]) && $_REQUEST[$path] !== '') {
+            $logicalPath = $_REQUEST[$path];
+
+        }else {
+            if (isset($request[$path]) && $request[$path] !== '') {
+                
+                $logicalPath = $request[$path];
+            }
+        }
+        return $logicalPath;
+    }            
     /**
      * Process the given path to get the controller, action and params.
      * 
      * @param type $path 
      */
     public function processPath($path) {
-        $request = explode('/', $path);
-        if (isset($request[1]) && $request[1] != '') {
-            $this->setController($request[1]);
-        }
-        
-        if (isset($request[2]) && $request[2] != '') {
-            $this->setAction($request[2]);
+        $req = explode('/', (false !== $str = strstr($path, '?', true)) ? $str : $path);
+        $request = array();
+        $arrPaths = array('namespace', 'controller', 'action');
+        for ($i = 1; $i<=3; $i++) {
+            if (isset($req[$i])) {
+                $request[$arrPaths[$i-1]] =  $req[$i];
+            }else{
+                $request[$arrPaths[$i-1]] = null;
+            }
         }
 
-        if (isset($request[3])) {
-            for ($i=0; $i<3; $i++) {
-                array_shift($request);
+        foreach ($arrPaths as $path) {
+            if (false !== $res = $this->getRequestPath($path, $request)) {
+                $this->setConfiguration(array($path => $res));
             }
-            $assoc = array();
-            $rounded = \floor(\count($request)*2/2)-2;
-            for ($i=0; $i<=$rounded; $i++) {
-                $assoc[$request[$i]] = $request[++$i];
-            }
-            $this->setParams($assoc);
         }
+        
+        $assoc = array();
+        $params = array_slice($req, 4);
+        $rounded = \floor(\count($params)*2/2)-2;
+        for ($i=0; $i<=$rounded; $i++) {
+            $assoc[$params[$i]] = $params[++$i];
+        }
+        $assoc += $_POST;
+        $this->setParams($assoc);
     }
 
     /**
@@ -265,7 +334,7 @@ class Utils {
         foreach ($params as $param) {
             $currentParam = $param->getName();
 
-            if (isset($request[$currentParam])) {
+            if (isset($request[$currentParam]) && $request[$currentParam] != '') {
                 $value = $request[$currentParam];        
             }else{
                 if ($param->isDefaultValueAvailable()) {
@@ -279,5 +348,4 @@ class Utils {
         }
         return $formalParams;
     }
-
 }

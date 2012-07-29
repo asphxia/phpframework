@@ -41,15 +41,26 @@ final class Router extends Utils\Utils {
         $namespace  = $this->getNamespace();
         $controller = $this->getController();
         $package    = $namespace . '\\' . $controller;
-        
+
         $action     = $this->getAction();
         $params     = $this->getParams();
-        
+
         if (class_exists($package)) {
             $rc = new \ReflectionClass($package);
             if ($rc->hasMethod($action)) {
                 $rm = $rc->getMethod($action);
-                return $rm->invokeArgs($rc->newInstance(), $this->parseParams($rm, $params));
+                $instance = $rc->newInstance();
+                
+                // Calling the action method for the given controller
+                if (false !== $res = $rm->invokeArgs($instance, $this->parseParams($rm, $params))){
+                    // we return the result and the controller instance
+                    $res['app'] = $instance;
+                    return $res;
+                }else{
+                    // if the action returns False we return that
+                    return false;
+                }
+                
             }else{
                 throw new Exception('Controller class doesn\'t has method `'.$action.'`');
             }
