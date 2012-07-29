@@ -2,7 +2,7 @@
 
 namespace Core\Router;
 
-require_once dirname(__FILE__) . '/../../../core/CoreException.php';
+require_once dirname(__FILE__) . '/../../../core/Exception.php';
 require_once dirname(__FILE__) . '/../../../core/router/utils/Utils.php';
 require_once dirname(__FILE__) . '/../../../core/router/Router.php';
 
@@ -54,9 +54,9 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
      * @covers {className}::{origMethodName}
      */
     public function testProcessPath() {
-        $path = '/controller/action/param1/value1/param2/value2';
+        $path = '/namespace/controller/action/param1/value1/param2/value2';
         $this->object->processPath($path);
-        $this->assertTrue($this->object->getController() == 'controller');
+        $this->assertTrue($this->object->getController() == 'Controller');
         $this->assertTrue($this->object->getAction() == 'action');
     }
     
@@ -65,16 +65,16 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
      */
     public function testSetController() {      
         $controllers = array(
-          'Index'  , 'Test', 'Cat\Fight', 'Fuck\You\All\To\Death'
+          'Index'  , 'Test', 'Other'
         );
         foreach ($controllers as $controller) {
             $this->object->setController($controller);
             $this->assertTrue($controller == $this->object->getController());
         }
         
-        //$this->setExpectedException('Core\Exception');
-        //$this->object->setController('3333dsd00:::\\/');
-        //$this->object->setController('/var/');
+        $this->setExpectedException('Core\Exception');
+        $this->object->setController('3333dsd00:::\\/');
+        $this->object->setController('/var/');
     }
     
     /**
@@ -161,12 +161,14 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $this->object->setNamespace($namespace);
         
         $test = array('name' => 'Anonymous');
-        $this->assertEquals($test, $this->object->routeController());
+        $res = $this->object->routeController();
+        $this->assertEquals($test['name'], $res['name']);
         
         $param = 'Adarioasd';
         $test = array('name' => $param);
         $this->object->setParams($test);
-        $this->assertEquals($test, $this->object->routeController());
+        $res = $this->object->routeController();
+        $this->assertEquals($test['name'], $res['name']);
     }
 }
 
