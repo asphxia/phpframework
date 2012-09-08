@@ -1,0 +1,19 @@
+<?xml version='1.0' standalone='yes'?>
+<root>
+    <include>
+        <files name = 'config/constants.xml' />
+        <files name = 'config/system.xml' />
+        <files name = 'config/router.xml' />
+        <files name = 'config/render.xml' />
+        <files name = 'config/cache.xml' />
+    </include>
+
+    <app
+        base-url = 'http://localhost/'
+        path = '/var/www/phpf/'
+        />
+
+    <constants
+        version='0.1'
+        />
+</root>

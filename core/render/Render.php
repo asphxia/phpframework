@@ -9,7 +9,6 @@
  * @built #buildtime#
  */
 namespace Core\Render;
-use Core\Utils\Logger as Logger;
 use Core\Exception as Exception;
 /**
  * Description of Render
@@ -140,7 +139,7 @@ class Render {
      */
     public function setViewsPath($dir) {
         $dir = realpath($this->getRootPath() . '/' . $dir);
-        if (false !== $this->validPath($dir)) {
+        if ($dir && false !== $this->validPath($dir)) {
             $this->pages = $dir;
         }else{
             throw new Exception('Invalid pages path: `' . $dir .'`');
@@ -312,9 +311,8 @@ class Render {
      * @return type 
      */
     private function getPageFullPath($page) {
-        $fullpath = $this->getViewsPath() . '/' .  \strtolower($page) . $this->getViewsExtension();
-        Logger::log("View fullpath: `" . $fullpath . '`');
-        return realpath($fullpath);
+        $path = realpath($this->getViewsPath() . '/' .  strtolower($page) . $this->getViewsExtension());
+        return $path;
     }
 
     /**
@@ -324,7 +322,6 @@ class Render {
      */
     private function requirePage() {
         $ap = $this->getPageFullPath($this->getActivePage());
-        Logger::log("View: $ap");
         if (file_exists( $ap )) {
             return $ap;
         }else{
@@ -342,13 +339,14 @@ class Render {
                 $$key = $val;
             }
         }
-        ob_clean();
-        ob_start();
-        require $this->requirePage();
-        $partial = ob_get_clean();
-        Logger::log("Master: $this->master");
+        @ob_clean();
+        @ob_start();
+        include $this->requirePage();
+        $partial = @ob_get_clean();
         if (isset($this->master) && $this->master != '') {
             require $this->master;
+        }else{
+            echo $partial;
         }
     }
 

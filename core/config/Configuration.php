@@ -10,19 +10,14 @@
  */
 namespace Core\Configuration;
 use Core\Exception;
-use Core\Utils\Singleton;
 use Core\Configuration\EncoderInterface as EncoderInterface;
+use Core\Utils\Logger as Logger;
 
 /**
  * 
  * @author asphyxia 
  */
-final class Configuration extends Singleton {
-    /**
-     *
-     * @var type 
-     */
-    protected static $_instance;
+final class Configuration {
     
     /**
      *
@@ -91,7 +86,7 @@ final class Configuration extends Singleton {
      * configuration. In this parameter is a string, it's converted to Array.
      * @return type
      */
-    public function getConfiguration($arrPath, $data = null) {
+    public function getConfiguration($arrPath = null, $data = null) {
         
         // If there is no data (src) configured
         if ($data == null && null === $data = $this->getData()) {
@@ -138,6 +133,7 @@ final class Configuration extends Singleton {
      * @return Object Returns the encoder given.
      */
     public function setEncoder(EncoderInterface $encoder) {
+        $this->_data = null;
         $this->_encoder = $encoder;
     }
     
@@ -160,10 +156,11 @@ final class Configuration extends Singleton {
      * @return bool True or False if the file wasn't found.
      */
     public function setDataSource($configuration) {
-        if (is_string($configuration) && file_exists($configuration)) {
-            $this->_config = $configuration;
+        $fullpath = $this->getIncludePath() . '/' . $configuration;
+        if (is_string($configuration) && file_exists($fullpath)) {
+            $this->_config = $fullpath;
         }else{
-            throw new Exception('Invalid DataSource provided or DataSource not found.');
+            throw new Exception('Invalid DataSource provided or DataSource not found: `' . $fullpath . '`');
         }
     }
     /**
@@ -201,9 +198,9 @@ final class Configuration extends Singleton {
             throw new Exception('No encoder defined.');
         }
         if ($this->_data === null) {
-            $this->_encoder->setDataSource($this->_config);
             $this->_includePath = $this->_includePath ? $this->_includePath : __DIR__ . '/../../';
             $this->_encoder->setIncludePath($this->_includePath);
+            $this->_encoder->setDataSource($this->_config);
             $this->_data = $this->_encoder->processConfig();
         }
         return $this->_data;

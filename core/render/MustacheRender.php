@@ -28,7 +28,6 @@ class MustacheRender extends Render {
             'partials_loader' => new MustacheLoader($this->getLayoutsPath(),
                     array('extension' => $this->getViewsExtension())),
         ));
-        Logger::log($this->m);
     }
     public function output($data = null) {
         ob_clean();
@@ -38,7 +37,6 @@ class MustacheRender extends Render {
         parent::output($data);
         $out = ob_get_clean();
         
-        Logger::log(array($out, $data));
         echo $this->m->render($out, $data);
     }
 

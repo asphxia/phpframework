@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <system
+        rootPath       = '../application/'
+        includePath    = '../application/controllers'>
+        <render
+            path = '../core/render/MustacheRender.php'
+            name = 'Core\Render\MustacheRender'/>
+    </system>
+    <defaults
+        namespace   = 'Index'
+        controller  = 'Index'
+        action      = 'index' />        
+</root>

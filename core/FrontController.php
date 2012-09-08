@@ -10,9 +10,8 @@ namespace Core;
 use Core\Utils\Logger as Logger;
 use Core\Utils\Singleton as Singleton;
 use Core\Configuration\Configuration as Configuration;
-use Core\Configuration\IniEncoder as IniEncoder;
+use Core\Configuration\XmlEncoder as XmlEncoder;
 use Core\Router\Router as Router;
-use Core\Render\Render as Render;
 use Core\Cache\Cache as Cache;
 
 /**
@@ -21,49 +20,57 @@ use Core\Cache\Cache as Cache;
 final class FrontController extends Singleton {
 
     /**
-     *
-     * @var type 
+     * Singleton instance variable.
+     * 
+     * @var type Object|null
      */
     protected static $_instance;
     
     /**
-     *
-     * @var type 
+     *  Current Router instance.
+     * 
+     * @var type Object|null
      */
     private $routerEngine = null;
     
     /**
-     *
-     * @var type 
+     * Router's call result.
+     * 
+     * @var type mixed|null
      */
     private $response = null;
     
     /**
-     *
-     * @var type 
+     * Current Configuration instance.
+     * 
+     * @var type Object|null
      */
     private $configEngine = null;
     
     /**
-     *
-     * @var type 
+     * Current Cache instance.
+     * 
+     * @var type Object|null
      */
     private $cacheEngine = null;
     
     /**
-     *
-     * @var type 
+     * Configuration files to look at
+     * 
+     * @var type Array
      */
     public static $CONFIGURATION_FILES = array('user', 'app', 'default');
     
     /**
-     *
-     * @var type 
+     * Directory to search for configuration files
+     * 
+     * @var type Array
      */
     public static $INCLUDE_PATHS = array('', 'config/');
     
     /**
-     *
+     * Sets the Router to handle routing and dispatching.
+     * 
      * @param Router $router 
      */
     public function setRouterEngine(Router $router = null) {
@@ -71,32 +78,39 @@ final class FrontController extends Singleton {
     }
 
     /**
-     *
-     * @return type 
+     * Gets the current routerEngine or instantiates one
+     * 
+     * @return type Object
      */
     public function getRouterEngine() {
-        if (!$this->routerEngine) {
-            $config = $this->getConfigurationEngine();
-            $defaults = $config->getConfiguration('defaults');
-            $system = $config->getConfiguration('system');
-            $rewrites = $config->getConfiguration('rewrites');
-            $this->routerEngine = new Router(array(
-                'namespace' => $defaults['namespace'],
-                'controller'=> $defaults['controller'],
-                'action'    => $defaults['action'],
-                'request'   => $_SERVER['REQUEST_URI'],
-                'rewrites'  => $rewrites,
-            ));
-            
-            $this->routerEngine->setIncludePath($this->preprocessPath(__DIR__ . '/' . $system['includePath']));
-
+        if (isset($this->routerEngine)) {
+            return $this->routerEngine;
         }
-        Logger::log($this->routerEngine);
+        $config = $this->getConfigurationEngine();
+
+        $defaults = $config->getConfiguration('defaults');
+        $system = $config->getConfiguration('system');
+        $rewrites = $config->getConfiguration('rewrites');
+        if (!is_array($rewrites) || empty($rewrites)) {
+            $rewrites['key'] = array();
+        }
+
+        $this->routerEngine = new Router(array(
+            'namespace' => $defaults['namespace'],
+            'controller'=> $defaults['controller'],
+            'action'    => $defaults['action'],
+            'request'   => $_SERVER['REQUEST_URI'],
+            'rewrites'  => $rewrites['key'],
+        ));
+
+        $this->routerEngine->setIncludePath($this->preprocessPath(__DIR__ . '/' . $system['includePath']));
+
         return $this->routerEngine;
     }
     
     /**
-     *
+     * Sets the configuration Engine
+     * 
      * @param Configuration $configuration 
      */
     public function setConfigurationEngine(Configuration $configuration = null) {
@@ -104,61 +118,78 @@ final class FrontController extends Singleton {
     }
 
     /**
-     *
-     * @return type 
+     * Gets the current configuration Engine or instantiates one
+     * 
+     * @return type Object
      */
     public function getConfigurationEngine() {
-        if (!$this->configEngine) {
-            $this->configEngine = Configuration::getInstance();
-            
-            $configurationFiles = array();
-            if (isset($_SERVER['SERVER_NAME']) && null !== $serverName = $_SERVER['SERVER_NAME']) {
-                array_unshift(self::$CONFIGURATION_FILES, $serverName);
-            }
-            foreach (self::$INCLUDE_PATHS as $path) {
-                foreach (self::$CONFIGURATION_FILES as $fileName) {   
-                    $configurationFiles[] = $path . $fileName;
-                }
-            }
-            foreach ($configurationFiles as $config) {
-                $path = __DIR__ . '/../' . $config . '.ini';
-                $config = realpath($path);
-                Logger::log($path);
-                if (file_exists($config)) {
-                    $this->configEngine->setDataSource($config);
-                    break;
-                }
-            }
-            $this->configEngine->setEncoder(new IniEncoder());
+        if (isset($this->configEngine)) {
+            return $this->configEngine;
         }
+        $this->configEngine = new Configuration();
+
+        // Preprocess and concatenates the arrays CONFIGURATION_FILES and INCLUDE_PATHS
+        $configurationFiles = array();
+        if (isset($_SERVER['SERVER_NAME']) && null !== $serverName = $_SERVER['SERVER_NAME']) {
+            array_unshift(self::$CONFIGURATION_FILES, $serverName);
+        }
+
+        foreach (self::$INCLUDE_PATHS as $path) {
+            foreach (self::$CONFIGURATION_FILES as $fileName) {   
+                $configurationFiles[] = $path . $fileName;
+            }
+        }
+
+        // TODO Get encoder from environment (setenv)
+        // Create a config bootstrap? a PHP that handles the basic configs of the system
+        $configFile = false;
+        foreach ($configurationFiles as $config) {
+            $path = __DIR__ . '/../' . $config . '.xml';
+            if (false != $config = realpath($path)) {
+                $configFile  = $config;
+                break;
+            }
+        }
+        if (!$configFile) {
+            throw new Exception('No configuration files found.');
+        }
+
+        $this->configEngine->setDataSource($configFile);
+        $this->configEngine->setEncoder(new XmlEncoder());
+
         return $this->configEngine;
     }
 
     /**
-     *
+     * Gets the current render Engine or instantiates one
+     * 
      * @return \Core\render
      * @throws Exception 
      */
     public function getRenderEngine() {
-        if (!$this->renderEngine) {
-            $router = $this->getRouterEngine();
-            $config = $this->getConfigurationEngine();
-
-            if (null !== $render = $config->getConfiguration(array('system' => 'render'))) {
-                if (!class_exists($render['name'])) {
-                    require __DIR__ . '/' . $render['path'];
-                }
-                $configuration = $this->preprocessPaths($config->getConfiguration(array('render')));
-
-                $render = new $render['name'](array('config' => $configuration));
-                $render->setActivePage($router->getAction(), $router->getController());
-                return $render;
-
-            } else {
-                throw new Exception('Render not found: `' . $render . '`');
-            }
+        if (isset($this->renderEngine)) {
+            return $this->renderEngine;
         }
-        return $this->renderEngine;
+        
+        $router = $this->getRouterEngine();
+        $config = $this->getConfigurationEngine();
+
+        $render = $config->getConfiguration(array('system' => 'render'));
+        if (null !== $render) {
+            
+            require_once __DIR__ . '/' . $render['path'];
+            
+            $configuration = $this->preprocessPaths($config->getConfiguration(array('render')));
+            $this->renderEngine = new $render['name'](array('config' => $configuration));
+            $this->renderEngine->setActivePage($router->getAction(), $router->getController());
+            
+            return $this->renderEngine;
+            
+        } else {
+            throw new Exception('Render not found: `' . $render . '`');
+        }
+        
+        
     }
 
     /**
@@ -166,12 +197,14 @@ final class FrontController extends Singleton {
      * @return type 
      */
     public function getCacheEngine() {
-        if (!$this->cacheEngine) {
-            $config = $this->getConfigurationEngine();
-            $config = $this->preprocessPaths($config->getConfiguration('cache'));
-            Logger::log($config);
-            $this->cacheEngine = new Cache( $config );
+        if (isset($this->cacheEngine)) {
+            return $this->renderEngine;
         }
+
+        $config = $this->getConfigurationEngine();
+        $cacheConfig = $this->preprocessPaths($config->getConfiguration('cache'));
+        $this->cacheEngine = new Cache( $cacheConfig );
+
         return $this->cacheEngine;
     }
     
@@ -214,6 +247,13 @@ final class FrontController extends Singleton {
             return $res;
         }
     }
+    
+    /**
+     * Replaces configuration pseudo variables $namespace, $controller, $action with actual values.
+     * 
+     * @param type Array
+     * @return type Array
+     */
     private function preprocessPaths($configuration) {
         foreach ($configuration as $key => $val) {
             $val = $this->preprocessPath($val);
@@ -221,6 +261,12 @@ final class FrontController extends Singleton {
         }
         return $configuration;
     }
+    
+    /**
+     * 
+     * @param type $path
+     * @return type
+     */
     private function preprocessPath($path){
         foreach (array('$namespace','$controller', '$action') as $variable) {
             $x = str_replace('$', '', $variable);
@@ -229,11 +275,24 @@ final class FrontController extends Singleton {
         }
         return $path;
     }
+    
+    /**
+     * 
+     * @return type
+     */
     public function getBasePath() {
         return $this->getRouterEngine()->getRequest();
     }
     
+    /**
+     * 
+     * @param type $to
+     */
     public function redirect($to) {
-        header("Location: " . $to);
+        if (!headers_sent()) {
+            header("Location: " . $to);
+        }else{
+            echo '<meta http-equiv="refresh" content="1;url=' . $to . '">';
+        }
     }
 }

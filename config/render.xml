@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <render
+        rootPath       = '../../application/views/'
+        layoutsPath    = './'
+        viewsPath      = '$controller/$action'
+        masterPage     = 'master.phtml'
+        viewsExtension ='.phtml'
+        activePage     = 'index'
+        namespace      = ''
+    />
+</root>

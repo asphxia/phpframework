@@ -1,7 +1,7 @@
 project.base=.
 project.build=${project.base}/build
 project.distfilename=phpframework.tar.gz
-export.dir=/var/www/virtual/phpf
+export.dir=/var/www/phpf
 author=Asphyxia
 legal.notice=Copyleft 2012 ${author}
 license=

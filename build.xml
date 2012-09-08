@@ -31,7 +31,7 @@
     <!-- core-src + web-src + configuration -->
     <fileset id="skeleton-src" dir="${project.base}">
         <!-- default essential configuration -->
-        <include name="config/*.ini" />
+        <include name="config/*.xml" />
         
         <!-- bare bootstrap app -->
         <include name="web/.htaccess" />
