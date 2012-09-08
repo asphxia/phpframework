@@ -43,9 +43,10 @@
     
     <!-- app files -->
     <fileset id="app-src" dir="${project.base}">
-        <include name="application/views/**/*.phtml" />
-        <include name="application/controllers/*.php" />
-        <include name="application/models/*.php" />
+        <include name="application/**/views/**" />
+        <include name="application/**/controllers/*.php" />
+        <include name="application/**/models/*.php" />
+        <include name="application/**/config/*.ini" />
     </fileset>
     
     <fileset id="vendor" dir="${project.base}">

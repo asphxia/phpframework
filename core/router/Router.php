@@ -54,7 +54,9 @@ final class Router extends Utils\Utils {
                 // Calling the action method for the given controller
                 if (false !== $res = $rm->invokeArgs($instance, $this->parseParams($rm, $params))){
                     // we return the result and the controller instance
-                    $res['app'] = $instance;
+                    if (is_array($res)) {
+                        $res['app'] = $instance;
+                    }
                     return $res;
                 }else{
                     // if the action returns False we return that

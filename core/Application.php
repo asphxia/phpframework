@@ -16,6 +16,7 @@
  */
 namespace Core;
 use Core\FrontController as FrontController;
+use Core\Configuration as Configuration;
 
 class Application {
     /**
@@ -27,7 +28,7 @@ class Application {
      * Global configuration array
      * @var type 
      */
-    private $configuration;
+    public $config;
     
     public static $ROOT;
     
@@ -38,18 +39,25 @@ class Application {
         
         self::$ROOT = Core::$ROOT;
         
+        $this->router = FrontController::getInstance()->getRouterEngine();
+        $this->namespace = $this->router->getNamespace();
+        $this->appConfigFilename = ucfirst(strtolower($this->namespace)) . '.ini';
+        $this->includePath = self::$ROOT . 'application/'. $this->namespace . '/config/';
+        //Logger::log($this->includePath);
         // global app settings (for all apps)
-        $this->config = FrontController::getInstance()->getConfigurationEngine();
-        $this->configuration = $this->config->getConfiguration(array('app'));
-         
-        // deprecated stuff. move away.
-        $this->postUrl = $this->configuration['postUrl'];
-        $this->getUrl = $this->configuration['getUrl'];
-        $this->basePath = $this->getUrl;
-        $this->baseUrl = $this->basePath;
-                        
-        $this->rebaseGetUrl = $this->postUrl = $this->configuration['rebaseGetUrl'];
-        $this->rebasePostUrl = $this->postUrl = $this->configuration['rebasePostUrl'];
+        $this->globalConfig = FrontController::getInstance()->getConfigurationEngine();
+        $this->config = $this->globalConfig->getConfiguration(array('app'));
+        
+        // individual settings defined by namespace
+        $this->appConfig = new Configuration\Configuration();
+        $this->appConfig->setConfiguration($this->appConfigFilename,
+                        new Configuration\IniEncoder(),
+                        $this->includePath
+                    );
+        $this->config += $this->appConfig->getConfiguration(array('self'));
+
+        $this->basetUrl = $this->config['base-url'];
+        $this->appPath = $this->config['app-path'];
         //
 
     }
