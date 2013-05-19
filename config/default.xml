@@ -10,7 +10,7 @@
 
     <app
         base-url = 'http://localhost/'
-        path = '/var/www/phpf/'
+        app-path = '/var/www/phpf/'
         />
 
     <constants
