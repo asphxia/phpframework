@@ -250,6 +250,8 @@ class Utils {
     public function setRewrites(Array $rewrites = array()) { 
         $url = $this->getRequest() ? $this->getRequest() : $_SERVER['REQUEST_URI'];
         $requestUri = str_replace('.php', '', (false != $str = strstr($url, '?', -1)) ? $str : $url );
+        $requestUri = $requestUri[strlen($requestUri)-1] != '/' ? "${requestUri}/" : $requestUri;
+
         foreach ($rewrites as $match => $change) {
             $requestUri = str_replace($match, $change, $requestUri);
         }
