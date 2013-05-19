@@ -9,13 +9,25 @@
  * @license ${license}
  * @built ${buildtime}
  */
-namespace Core;
-// Require components
-require dirname(__FILE__) . '/../core/Core.php';
+
+// Define root's constants
+define('__ROOT__', realpath(dirname(__FILE__) . '/../') . '/');
+
+// Register Autoloaders paths
+require_once __ROOT__.'vendor/Autoloader/Autoloader.php';
+
+// Remove default current (web) autoloader path
+Autoloader::getRegisteredAutoloader()->remove();
+
+// Load custom paths
+foreach (array('core', 'vendor', 'libs') as $classPath) {
+    $_autoloader = new \Autoloader(__ROOT__ . $classPath);
+    $_autoloader->register();
+}
 
 // Initialize the FrontControllers
 // Call the given controller and action
-$Fc = FrontController::getInstance();
+$Fc = Core\FrontController::getInstance();
 $Fc->routeController();
 
 // Now through the singleton FC we have our body developed behind the scenes
