@@ -30,6 +30,8 @@ class Application {
      */
     public $config;
     
+
+    // remove this
     public static $ROOT;
     
     /**
@@ -41,14 +43,17 @@ class Application {
         
         $this->router = FrontController::getInstance()->getRouterEngine();
         $this->namespace = $this->router->getNamespace();
+
+        // Remove .ini from here. Must be configurable!
         $this->appConfigFilename = ucfirst(strtolower($this->namespace)) . '.ini';
-        $this->includePath = self::$ROOT . 'application/'. $this->namespace . '/config/';
+
         //Logger::log($this->includePath);
         // global app settings (for all apps)
         $this->globalConfig = FrontController::getInstance()->getConfigurationEngine();
         $this->config = $this->globalConfig->getConfiguration(array('app'));
         
         // individual settings defined by namespace
+        $this->includePath = $this->config['root-path'] . $this->namespace . '/config/';
         $this->appConfig = new Configuration\Configuration();
         $this->appConfig->setConfiguration($this->appConfigFilename,
                         new Configuration\IniEncoder(),
@@ -58,7 +63,6 @@ class Application {
 
         $this->basetUrl = $this->config['base-url'];
         $this->appPath = $this->config['app-path'];
-        //
 
     }
 }

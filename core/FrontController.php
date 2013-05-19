@@ -155,6 +155,8 @@ final class FrontController extends Singleton {
         }
 
         $this->configEngine->setDataSource($configFile);
+
+        // TODO: Make this configurable!!
         $this->configEngine->setEncoder(new XmlEncoder());
 
         return $this->configEngine;
