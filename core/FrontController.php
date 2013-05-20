@@ -200,7 +200,7 @@ final class FrontController extends Singleton {
      */
     public function getCacheEngine() {
         if (isset($this->cacheEngine)) {
-            return $this->renderEngine;
+            return $this->cacheEngine;
         }
 
         $config = $this->getConfigurationEngine();
