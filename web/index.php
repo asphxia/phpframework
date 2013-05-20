@@ -23,7 +23,7 @@ require_once __ROOT__.'vendor/Autoloader/Autoloader.php';
 Autoloader::getRegisteredAutoloader()->remove();
 
 // Load custom paths
-foreach (array('core', 'vendor', 'apps', 'libs') as $classPath) {
+foreach (array('/') as $classPath) {
     $_autoloader = new \Autoloader(__ROOT__ . $classPath);
     $_autoloader->register();
 }
@@ -45,7 +45,8 @@ if (!empty($_POST)) {
 Logger::info( 'Base-path: ' . $Fc->getBasePath() );
 
 // If cache is outdated or there is logic to be done
-if ( $Cache->rebuild( $Fc->getBasePath() ) && $Fc->routeController() ) {
+if (($Cache->rebuild( $Fc->getBasePath() ) || isset($_SESSION['development'])) && $Fc->routeController()) {
+
     $Cache->invalidateCache();
 
     // Grab the output

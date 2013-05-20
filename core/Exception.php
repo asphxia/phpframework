@@ -4,7 +4,7 @@ use Core\Utils\Logger as Logger;
 
 final class Exception extends \Exception{
     public static function redirect(){
-        if ($_SERVER["REQUEST_URI"] !== '/' && !isset($_COOKIE['rape'])) {
+        if ($_SERVER["REQUEST_URI"] !== '/' && !isset($_SESSION['development'])) {
             header("Location: /");
         }
     }

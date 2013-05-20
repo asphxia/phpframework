@@ -55,13 +55,11 @@ class Application {
         // individual settings defined by namespace
         $this->includePath = $this->config['root-path'] . $this->namespace . '/config/';
         $this->appConfig = new Configuration\Configuration();
-        $this->appConfig->setConfiguration($this->appConfigFilename,
-                        new Configuration\IniEncoder(),
-                        $this->includePath
-                    );
-        $this->config += $this->appConfig->getConfiguration(array('self'));
 
-        $this->basetUrl = $this->config['base-url'];
+        $this->appConfig->setConfiguration($this->appConfigFilename, new Configuration\IniEncoder(), $this->includePath);
+
+        $this->config += $this->appConfig->getConfiguration(array('self'));
+        $this->baseUrl = $this->config['base-url'];
         $this->appPath = $this->config['app-path'];
 
     }

@@ -30,7 +30,7 @@ final class Core {
             session_start();
         }
 
-        if (isset($_COOKIE['rape']) && $_COOKIE['rape'] == 'misery') {
+        if (isset($_SESSION['development'])) {
             Logger::getInstance()->enabled = true;
         }
     }
