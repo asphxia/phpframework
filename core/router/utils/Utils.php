@@ -316,7 +316,7 @@ class Utils {
         for ($i=0; $i<=$rounded; $i++) {
             $assoc[$params[$i]] = $params[++$i];
         }
-        $assoc += $_POST;
+        $assoc += $_REQUEST;
         $this->setParams($assoc);
     }
 
