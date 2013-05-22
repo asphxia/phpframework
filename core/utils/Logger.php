@@ -15,11 +15,34 @@
  * @author asphyxia
  */
 namespace Core\Utils;
-require_once __ROOT__.'vendor/ChromePHP/ChromePhp.php';
-class Logger extends \ChromePhp {
-    public function __construct()
-    {
-        @ob_start();
-        return ChromePhp::getInstance(true);
+class Logger extends Singleton {
+    private $logger = null;
+    public static $_instance = null;
+    public $enabled = false;
+    
+    public function setDriver($logger) {
+      $this->logger = $logger;
+    }
+
+    public function debug($log, $func = 'debug') {
+      if ($this->enabled) {
+        $this->logger->$func($log);
+      }
+    }
+    
+    public static function log($log) {
+      self::getInstance()->debug($log, 'log');
+    }
+
+    public static function info($log) {
+      self::getInstance()->debug($log, 'info');
+    }
+
+    public static function warn($log) {
+      self::getInstance()->debug($log, 'warn');
+    }
+
+    public static function error($log) {
+      self::getInstance()->debug($log, 'error');
     }
 }

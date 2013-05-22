@@ -33,6 +33,9 @@ foreach (array('/') as $classPath) {
 $Fc = FrontController::getInstance();
 $Cache = $Fc->getCacheEngine();
 
+// Load Core hooks and configuration
+new Core\Core($Fc->getConfigurationEngine()->getConfiguration());
+
 // Initialize timers for performance measurements
 $timer = new Timer();
 $timer->start();

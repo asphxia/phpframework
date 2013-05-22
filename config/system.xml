@@ -10,5 +10,9 @@
     <defaults
         namespace   = 'Index'
         controller  = 'Index'
-        action      = 'index' />        
+        action      = 'index' />  
+    <environment>      
+      <development>
+      </development>
+    </environment>
 </root>
