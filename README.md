@@ -6,7 +6,9 @@
 
 A small, configurable PHP web framework. A PHP web framework written that aims to run small web sites with little-to-no programming. Most of the framework runs out of the box with little configuration.
 
-Support configurable template engine (such as Smarty, MustachePHP, PHP itself and so on)
+Support configurable template engine (such as Smarty, MustachePHP, PHP itself and so on). Cache out-of-the-box and Autoloading.
+
+The code is Unit tested with PHPUnit and deployed with Phing.
 
 ## Dependencies
 
@@ -15,6 +17,8 @@ Support configurable template engine (such as Smarty, MustachePHP, PHP itself an
 * [StashPHP][4] (optional)
 * [MustachePHP][5] (optional)
 * [ChromePHP][7] (optional)
+* [PHPUnit][8] (optional)
+* [Phing][9] (optional)
 
 ## Installation and Use
 
@@ -35,3 +39,5 @@ phpframework is licensed under the [GNU GPL v3][2]([tldr][3]); that means you're
   [5]: https://github.com/bobthecow/mustache.php
   [6]: http://php-autoloader.malkusch.de/en/
   [7]: https://github.com/ccampbell/chromephp
+  [8]: https://github.com/sebastianbergmann/phpunit
+  [9]: https://github.com/phingofficial/phing
