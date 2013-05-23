@@ -4,7 +4,7 @@
 
 ## About phpframework
 
-A small, configurable PHP web framework. A PHP web framework written that aims to run small web sites with little-to-no programming. Most of the framework runs out of the box with little configuration.
+A small, configurable PHP web framework. A PHP web framework that aims to run small web sites with little-to-no programming. Most of the framework runs out of the box with little configuration.
 
 Support configurable template engine (such as Smarty, MustachePHP, PHP itself and so on). Cache out-of-the-box and Autoloading.
 
